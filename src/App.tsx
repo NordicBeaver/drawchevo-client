@@ -1,9 +1,8 @@
+import WelcomeScreen from './features/lobby/WelcomeScreen';
+import Button from './ui/Button';
+
 function App() {
-  return (
-    <div className="App">
-      <h1 className="text-2xl">Welcome to DrawChevo!</h1>
-    </div>
-  );
+  return <WelcomeScreen></WelcomeScreen>;
 }
 
 export default App;
