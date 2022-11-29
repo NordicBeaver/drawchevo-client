@@ -6,5 +6,14 @@ export interface ButtonProps {
   variant: 'default' | 'primary';
 }
 export default function Button({ label, variant, onClick }: ButtonProps) {
-  return <button className="bg-brand text-text uppercase text-xl w-full p-2 rounded">{label}</button>;
+  return (
+    <button
+      className={`${
+        variant === 'primary' ? 'bg-brand' : 'bg-secondary'
+      } text-text uppercase text-xl w-full p-2 rounded`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
 }
