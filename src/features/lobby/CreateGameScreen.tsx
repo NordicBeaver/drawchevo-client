@@ -1,11 +1,11 @@
-import axios from 'axios';
 import React, { useState } from 'react';
+import { createRoom, joinRoom, PlayerDto, RoomDto } from '../../api/api';
 import Button from '../../ui/Button';
 import Container from '../../ui/Container';
 import TextInput from '../../ui/TextInput';
 
 export interface CreateGameScreenProps {
-  onCreate?: () => void;
+  onCreate?: (room: RoomDto, player: PlayerDto) => void;
   onBack?: () => void;
 }
 export default function CreateGameScreen({ onCreate, onBack }: CreateGameScreenProps) {
@@ -16,10 +16,9 @@ export default function CreateGameScreen({ onCreate, onBack }: CreateGameScreenP
       return;
     }
 
-    const createRoomReponse = await axios.post('http://localhost:3001/room');
-    console.log('Room created', createRoomReponse.data);
-
-    onCreate?.();
+    const room = await createRoom();
+    const player = await joinRoom({ roomCode: room.code, username: username });
+    onCreate?.(room, player);
   };
 
   return (
