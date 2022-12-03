@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlayerDto, RoomDto } from './api/api';
 import CreateGameScreen from './features/lobby/CreateGameScreen';
 import JoinGameScreen from './features/lobby/JoinGameScreen';
 import RoomScreen from './features/lobby/RoomScreen';
 import WelcomeScreen from './features/lobby/WelcomeScreen';
+import { io, Socket } from 'socket.io-client';
 
 function App() {
   // TODO: Think about using router instead.
@@ -11,6 +12,17 @@ function App() {
 
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
+
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  useEffect(() => {
+    const newSocket = io('ws://localhost:3001');
+    setSocket(newSocket);
+    return () => {
+      socket?.disconnect();
+      setSocket(null);
+    };
+  }, []);
 
   const handleWelcomeScreenCreateGame = () => {
     setScreen('create-game');
@@ -47,8 +59,8 @@ function App() {
         <CreateGameScreen onBack={handleGameScreenBack} onCreate={handleCreateGame}></CreateGameScreen>
       ) : screen === 'join-game' ? (
         <JoinGameScreen onBack={handleGameScreenBack} onJoin={handleJoinGame}></JoinGameScreen>
-      ) : roomCode != null && playerId != null ? (
-        <RoomScreen playerId={playerId} roomCode={roomCode}></RoomScreen>
+      ) : socket != null && roomCode != null && playerId != null ? (
+        <RoomScreen socket={socket} playerId={playerId} roomCode={roomCode}></RoomScreen>
       ) : (
         <div>Something is wrong...</div>
       )}

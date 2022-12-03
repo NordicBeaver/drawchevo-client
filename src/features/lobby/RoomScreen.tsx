@@ -2,27 +2,34 @@ import React, { useEffect, useState } from 'react';
 import { getRoom, RoomDto } from '../../api/api';
 import Button from '../../ui/Button';
 import Container from '../../ui/Container';
+import { Socket } from 'socket.io-client';
 
 export interface RoomScreenProps {
   playerId: string;
   roomCode: string;
+  socket: Socket;
   onStartGame?: () => void;
   onQuit?: () => void;
 }
 
-export default function RoomScreen({ playerId, roomCode, onStartGame, onQuit }: RoomScreenProps) {
+export default function RoomScreen({ playerId, roomCode, socket, onStartGame, onQuit }: RoomScreenProps) {
   const [room, setRoom] = useState<RoomDto | null>(null);
 
   useEffect(() => {
-    const intervalId = setInterval(async () => {
-      const room = await getRoom(roomCode);
+    const listener = ({ room }: { room: RoomDto }) => {
       setRoom(room);
-    }, 1000);
-
-    return () => {
-      clearInterval(intervalId);
     };
-  }, [roomCode]);
+    socket.on('roomUpdate', listener);
+    return () => {
+      socket.off('roomUpdate', listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket != null && playerId != null) {
+      socket.emit('playerConnect', { playerId: playerId });
+    }
+  }, [socket, playerId]);
 
   if (!room) {
     return <div>Loading...</div>;
