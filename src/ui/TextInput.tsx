@@ -11,7 +11,7 @@ export default function TextInput({ label, value, onChange }: TextInputProps) {
       <label className="text-brand text-sm">{label}</label>
       <input
         type="text"
-        className="rounded p-2 focus:outline-none"
+        className="rounded p-2 focus:outline-none text-text-alt"
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
       ></input>

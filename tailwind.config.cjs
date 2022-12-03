@@ -8,6 +8,7 @@ module.exports = {
       background: '#0A090D',
       secondary: '#B2A7B6',
       text: '#ffffff',
+      'text-alt': '#000000',
     },
   },
   plugins: [],
