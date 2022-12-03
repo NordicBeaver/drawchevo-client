@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { PlayerDto, RoomDto } from './api/api';
 import CreateGameScreen from './features/lobby/CreateGameScreen';
+import JoinGameScreen from './features/lobby/JoinGameScreen';
 import RoomScreen from './features/lobby/RoomScreen';
 import WelcomeScreen from './features/lobby/WelcomeScreen';
 
 function App() {
   // TODO: Think about using router instead.
-  const [screen, setScreen] = useState<'welcome' | 'create-game' | 'room'>('welcome');
+  const [screen, setScreen] = useState<'welcome' | 'create-game' | 'join-game' | 'room'>('welcome');
 
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -15,11 +16,21 @@ function App() {
     setScreen('create-game');
   };
 
+  const handleWelcomeScreenJoinGame = () => {
+    setScreen('join-game');
+  };
+
   const handleGameScreenBack = () => {
     setScreen('welcome');
   };
 
-  const handleGameScreenCreate = (room: RoomDto, player: PlayerDto) => {
+  const handleCreateGame = (room: RoomDto, player: PlayerDto) => {
+    setRoomCode(room.code);
+    setPlayerId(player.id);
+    setScreen('room');
+  };
+
+  const handleJoinGame = (room: RoomDto, player: PlayerDto) => {
     setRoomCode(room.code);
     setPlayerId(player.id);
     setScreen('room');
@@ -28,11 +39,16 @@ function App() {
   return (
     <div className="text-text">
       {screen === 'welcome' ? (
-        <WelcomeScreen onCreateGame={handleWelcomeScreenCreateGame}></WelcomeScreen>
+        <WelcomeScreen
+          onCreateGame={handleWelcomeScreenCreateGame}
+          onJoinGame={handleWelcomeScreenJoinGame}
+        ></WelcomeScreen>
       ) : screen === 'create-game' ? (
-        <CreateGameScreen onBack={handleGameScreenBack} onCreate={handleGameScreenCreate}></CreateGameScreen>
-      ) : roomCode != null ? (
-        <RoomScreen roomCode={roomCode}></RoomScreen>
+        <CreateGameScreen onBack={handleGameScreenBack} onCreate={handleCreateGame}></CreateGameScreen>
+      ) : screen === 'join-game' ? (
+        <JoinGameScreen onBack={handleGameScreenBack} onJoin={handleJoinGame}></JoinGameScreen>
+      ) : roomCode != null && playerId != null ? (
+        <RoomScreen playerId={playerId} roomCode={roomCode}></RoomScreen>
       ) : (
         <div>Something is wrong...</div>
       )}

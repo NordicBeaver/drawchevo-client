@@ -4,12 +4,13 @@ import Button from '../../ui/Button';
 import Container from '../../ui/Container';
 
 export interface RoomScreenProps {
+  playerId: string;
   roomCode: string;
   onStartGame?: () => void;
   onQuit?: () => void;
 }
 
-export default function RoomScreen({ roomCode, onStartGame, onQuit }: RoomScreenProps) {
+export default function RoomScreen({ playerId, roomCode, onStartGame, onQuit }: RoomScreenProps) {
   const [room, setRoom] = useState<RoomDto | null>(null);
 
   useEffect(() => {
@@ -41,12 +42,16 @@ export default function RoomScreen({ roomCode, onStartGame, onQuit }: RoomScreen
           <h2 className="text-xl">Players:</h2>
           <ul>
             {room.players.map((player) => (
-              <li>{player.name}</li>
+              <li className={`${player.id === playerId ? 'font-bold' : ''}`}>{player.name}</li>
             ))}
           </ul>
         </div>
         <div className="flex flex-col gap-4 items-stretch w-full">
-          <Button label="Start Game" variant="primary" onClick={onStartGame}></Button>
+          {room.hostId === playerId ? (
+            <Button label="Start Game" variant="primary" onClick={onStartGame}></Button>
+          ) : (
+            <p>Waiting for the host to start</p>
+          )}
           <Button label="Quit" variant="default" onClick={onQuit}></Button>
         </div>
       </div>

@@ -11,13 +11,14 @@ export interface RoomDto {
   id: string;
   code: string;
   players: PlayerDto[];
+  hostId: string;
 }
 
-export async function createRoom() {
-  const response = await axiosClient.post<{ room: RoomDto }>('room');
-  console.log('Response', response);
+export async function createRoom(username: string) {
+  const response = await axiosClient.post<{ room: RoomDto; player: PlayerDto }>('room/create', { username: username });
   const room = response.data.room;
-  return room;
+  const player = response.data.player;
+  return { room, player };
 }
 
 interface JoinRoomRequest {
@@ -26,6 +27,7 @@ interface JoinRoomRequest {
 }
 
 interface JoinRoomResponse {
+  room: RoomDto;
   player: PlayerDto;
 }
 
@@ -34,8 +36,9 @@ export async function joinRoom(requestData: JoinRoomRequest) {
     '/room/join',
     requestData
   );
+  const room = response.data.room;
   const player = response.data.player;
-  return player;
+  return { room, player };
 }
 
 export async function getRoom(code: string) {
