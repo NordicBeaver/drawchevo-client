@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import { joinRoom, PlayerDto, RoomDto } from '../../api/api';
 import Button from '../../ui/Button';
 import Container from '../../ui/Container';
 import TextInput from '../../ui/TextInput';
+import { useGameContext } from '../game/GameContext';
 
 interface JoinGameScreenProps {
-  onJoin: (room: RoomDto, player: PlayerDto) => void;
   onBack: () => void;
 }
 
-export default function JoinGameScreen({ onJoin, onBack }: JoinGameScreenProps) {
+export default function JoinGameScreen({ onBack }: JoinGameScreenProps) {
   const [roomCode, setRoomCode] = useState('');
   const [username, setUsername] = useState('');
+
+  const gameContext = useGameContext();
 
   const handleJoinGame = async () => {
     if (username == '' || roomCode == '') {
       return;
     }
 
-    const { room, player } = await joinRoom({ roomCode: roomCode, username: username });
-    onJoin?.(room, player);
+    gameContext.joinRoom({ roomCode: roomCode, username: username });
   };
 
   return (

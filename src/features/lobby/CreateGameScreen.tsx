@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import { createRoom, PlayerDto, RoomDto } from '../../api/api';
+import { useState } from 'react';
 import Button from '../../ui/Button';
 import Container from '../../ui/Container';
 import TextInput from '../../ui/TextInput';
+import { useGameContext } from '../game/GameContext';
 
 export interface CreateGameScreenProps {
-  onCreate?: (room: RoomDto, player: PlayerDto) => void;
   onBack?: () => void;
 }
-export default function CreateGameScreen({ onCreate, onBack }: CreateGameScreenProps) {
+export default function CreateGameScreen({ onBack }: CreateGameScreenProps) {
   const [username, setUsername] = useState('');
+
+  const gameContext = useGameContext();
 
   const handleCreateGame = async () => {
     if (username == '') {
       return;
     }
 
-    const { room, player } = await createRoom(username);
-    onCreate?.(room, player);
+    gameContext.createRoom({ username: username });
   };
 
   return (
