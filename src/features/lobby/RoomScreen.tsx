@@ -3,14 +3,20 @@ import Container from '../../ui/Container';
 import { useGameContext } from '../game/GameContext';
 
 export interface RoomScreenProps {
-  onStartGame?: () => void;
   onQuit?: () => void;
 }
 
-export default function RoomScreen({ onStartGame, onQuit }: RoomScreenProps) {
-  const { game, myPlayerId } = useGameContext();
+export default function RoomScreen({ onQuit }: RoomScreenProps) {
+  const gameContext = useGameContext();
 
-  if (!game) {
+  const handleStartGame = () => {
+    if (!gameContext.myPlayerId) {
+      return;
+    }
+    gameContext.startGame({ playerId: gameContext.myPlayerId });
+  };
+
+  if (!gameContext.game) {
     return <div>Loading...</div>;
   }
 
@@ -22,19 +28,19 @@ export default function RoomScreen({ onStartGame, onQuit }: RoomScreenProps) {
         </div>
         <div className="flex flex-col items-center">
           <span>Room code</span>
-          <span className="text-brand text-4xl">{game.code}</span>
+          <span className="text-brand text-4xl">{gameContext.game.code}</span>
         </div>
         <div>
           <h2 className="text-xl">Players:</h2>
           <ul>
-            {game.players.map((player) => (
-              <li className={`${player.id === myPlayerId ? 'font-bold' : ''}`}>{player.name}</li>
+            {gameContext.game.players.map((player) => (
+              <li className={`${player.id === gameContext.myPlayerId ? 'font-bold' : ''}`}>{player.name}</li>
             ))}
           </ul>
         </div>
         <div className="flex flex-col gap-4 items-stretch w-full">
-          {game.hostId === myPlayerId ? (
-            <Button label="Start Game" variant="primary" onClick={onStartGame}></Button>
+          {gameContext.game.hostId === gameContext.myPlayerId ? (
+            <Button label="Start Game" variant="primary" onClick={handleStartGame}></Button>
           ) : (
             <p>Waiting for the host to start</p>
           )}

@@ -1,5 +1,5 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
-import { Game } from './Game';
+import { Game, GameState } from './Game';
 import { io, Socket } from 'socket.io-client';
 
 export interface PlayerDto {
@@ -10,6 +10,7 @@ export interface PlayerDto {
 export interface RoomDto {
   id: string;
   code: string;
+  state: GameState;
   players: PlayerDto[];
   hostId: string;
 }
@@ -33,6 +34,14 @@ interface RoomJoinedPayload {
   player: PlayerDto;
 }
 
+interface StartGamePayload {
+  playerId: string;
+}
+
+interface PromptDoneByPlayerPayload {
+  promptText: string;
+}
+
 type Screen = 'welcome' | 'create-game' | 'join-game' | 'room';
 
 interface GameContextValue {
@@ -42,6 +51,8 @@ interface GameContextValue {
   setScreen: (screen: Screen) => void;
   createRoom: (payload: CreateRoomPayload) => void;
   joinRoom: (payload: JoinRoomPayload) => void;
+  startGame: (payload: StartGamePayload) => void;
+  sendPrompt: (payload: PromptDoneByPlayerPayload) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -73,6 +84,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
         id: room.id,
         players: room.players.map((p) => ({ id: p.id, name: p.name })),
         code: room.code,
+        state: room.state,
         hostId: room.hostId,
       });
     };
@@ -95,6 +107,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
           id: payload.room.id,
           hostId: payload.room.hostId,
           code: payload.room.code,
+          state: payload.room.state,
           players: payload.room.players.map((p) => ({ id: p.id, name: p.name })),
         });
         setMyPlayerId(payload.player.id);
@@ -117,12 +130,36 @@ export function GameContextProvider({ children }: PropsWithChildren) {
           id: payload.room.id,
           hostId: payload.room.hostId,
           code: payload.room.code,
+          state: payload.room.state,
           players: payload.room.players.map((p) => ({ id: p.id, name: p.name })),
         });
         setMyPlayerId(payload.player.id);
         setScreen('room');
       });
     },
+    [socket]
+  );
+
+  const startGame = useCallback(
+    (payload: StartGamePayload) => {
+      if (!socket) {
+        return;
+      }
+
+      socket.emit('startGame', payload);
+    },
+    [socket]
+  );
+
+  const sendPrompt = useCallback(
+    (payload: PromptDoneByPlayerPayload) => {
+      if (!socket) {
+        return;
+      }
+
+      socket.emit('promptDoneByPlayer', payload);
+    },
+
     [socket]
   );
 
@@ -133,6 +170,8 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     setScreen: setScreen,
     createRoom: createRoom,
     joinRoom: joinRoom,
+    startGame: startGame,
+    sendPrompt: sendPrompt,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
