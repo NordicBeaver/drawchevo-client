@@ -1,3 +1,4 @@
+import DrawingScreen from './features/game/DrawingScreen';
 import { useGameContext } from './features/game/GameContext';
 import PromptScreen from './features/game/PromptScreen';
 import CreateGameScreen from './features/lobby/CreateGameScreen';
@@ -36,10 +37,16 @@ export default function Drawchevo() {
           <RoomScreen></RoomScreen>
         ) : gameContext.game?.state === 'enteringPrompts' ? (
           <PromptScreen></PromptScreen>
+        ) : gameContext.game?.state === 'drawing' ? (
+          <DrawingScreen></DrawingScreen>
         ) : gameContext.game?.state === 'finished' ? (
           <div>Finished!</div>
-        ) : null
-      ) : null}
+        ) : (
+          <div>Game state not defined...</div>
+        )
+      ) : (
+        <div>Unknown screen...</div>
+      )}
     </div>
   );
 }
