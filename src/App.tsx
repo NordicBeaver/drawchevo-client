@@ -1,11 +1,14 @@
 import Drawchevo from './Drawchevo';
 import { GameContextProvider } from './features/game/GameContext';
+import { AppContextProvider } from './features/state/AppContext';
 
 function App() {
   return (
-    <GameContextProvider>
-      <Drawchevo></Drawchevo>
-    </GameContextProvider>
+    <AppContextProvider>
+      <GameContextProvider>
+        <Drawchevo></Drawchevo>
+      </GameContextProvider>
+    </AppContextProvider>
   );
 }
 

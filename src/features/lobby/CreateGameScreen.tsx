@@ -17,7 +17,7 @@ export default function CreateGameScreen({ onBack }: CreateGameScreenProps) {
       return;
     }
 
-    gameContext.createRoom({ username: username });
+    gameContext.createGame({ username: username });
   };
 
   return (

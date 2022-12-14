@@ -1,38 +1,60 @@
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { Game, GameState } from './Game';
 import { io, Socket } from 'socket.io-client';
+import { z } from 'zod';
+import { useAppContext } from '../state/AppContext';
 
-export interface PlayerDto {
-  id: string;
-  name: string;
-}
+const playerDtoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
 
-export interface RoomDto {
-  id: string;
-  code: string;
-  state: GameState;
-  players: PlayerDto[];
-  hostId: string;
-}
+export type PlayerDto = z.infer<typeof playerDtoSchema>;
 
-interface CreateRoomPayload {
-  username: string;
-}
+const GameStateSchema = z.enum(['NotStarted', 'EnteringPrompts', 'Drawing', 'Finished']);
 
-interface RoomCreatedPayload {
-  room: RoomDto;
-  player: PlayerDto;
-}
+const gameDtoSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  state: GameStateSchema,
+  players: z.array(playerDtoSchema),
+  hostId: z.string(),
+});
 
-interface JoinRoomPayload {
-  roomCode: string;
-  username: string;
-}
+export type GameDto = z.infer<typeof gameDtoSchema>;
 
-interface RoomJoinedPayload {
-  room: RoomDto;
-  player: PlayerDto;
-}
+const gameUpdatePayloadSchema = z.object({
+  game: gameDtoSchema,
+});
+
+type GameUpdateDto = z.infer<typeof gameUpdatePayloadSchema>;
+
+const createGamePayloadSchema = z.object({
+  username: z.string(),
+});
+
+type CreateGamePayload = z.infer<typeof createGamePayloadSchema>;
+
+const gameCreatedPayloadSchema = z.object({
+  game: gameDtoSchema,
+  player: playerDtoSchema,
+});
+
+type GameCreatedPayload = z.infer<typeof gameCreatedPayloadSchema>;
+
+const joinGamePayloadSchema = z.object({
+  roomCode: z.string(),
+  username: z.string(),
+});
+
+type JoinGamePayload = z.infer<typeof joinGamePayloadSchema>;
+
+const gameJoinedPayloadSchema = z.object({
+  game: gameDtoSchema,
+  player: playerDtoSchema,
+});
+
+type GameJoinedPayload = z.infer<typeof gameCreatedPayloadSchema>;
 
 interface StartGamePayload {
   playerId: string;
@@ -42,15 +64,11 @@ interface PromptDoneByPlayerPayload {
   promptText: string;
 }
 
-type Screen = 'welcome' | 'create-game' | 'join-game' | 'room';
-
 interface GameContextValue {
-  screen: Screen;
   game: Game | null;
   myPlayerId: string | null;
-  setScreen: (screen: Screen) => void;
-  createRoom: (payload: CreateRoomPayload) => void;
-  joinRoom: (payload: JoinRoomPayload) => void;
+  createGame: (payload: CreateGamePayload) => void;
+  joinRoom: (payload: JoinGamePayload) => void;
   startGame: (payload: StartGamePayload) => void;
   sendPrompt: (payload: PromptDoneByPlayerPayload) => void;
 }
@@ -62,8 +80,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
   const [game, setGame] = useState<Game | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
 
-  // TODO: Think about using router instead.
-  const [screen, setScreen] = useState<Screen>('welcome');
+  const appContext = useAppContext();
 
   useEffect(() => {
     const newSocket = io('ws://localhost:3001');
@@ -79,13 +96,15 @@ export function GameContextProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    const listener = ({ room }: { room: RoomDto }) => {
+    const listener = (data: any) => {
+      const payload = gameUpdatePayloadSchema.parse(data);
+      const game = payload.game;
       setGame({
-        id: room.id,
-        players: room.players.map((p) => ({ id: p.id, name: p.name })),
-        code: room.code,
-        state: room.state,
-        hostId: room.hostId,
+        id: game.id,
+        players: game.players.map((p) => ({ id: p.id, name: p.name })),
+        code: game.code,
+        state: game.state,
+        hostId: game.hostId,
       });
     };
     socket.on('gameUpdate', listener);
@@ -95,46 +114,48 @@ export function GameContextProvider({ children }: PropsWithChildren) {
   }, [socket]);
 
   const createRoom = useCallback(
-    (payload: CreateRoomPayload) => {
+    (payload: CreateGamePayload) => {
       if (!socket) {
         return;
       }
 
-      socket.emit('createRoom', payload);
+      socket.emit('createGame', payload);
 
-      socket.once('roomCreated', (payload: RoomCreatedPayload) => {
+      socket.once('gameCreated', (data: any) => {
+        const payload = gameCreatedPayloadSchema.parse(data);
         setGame({
-          id: payload.room.id,
-          hostId: payload.room.hostId,
-          code: payload.room.code,
-          state: payload.room.state,
-          players: payload.room.players.map((p) => ({ id: p.id, name: p.name })),
+          id: payload.game.id,
+          hostId: payload.game.hostId,
+          code: payload.game.code,
+          state: payload.game.state,
+          players: payload.game.players.map((p) => ({ id: p.id, name: p.name })),
         });
         setMyPlayerId(payload.player.id);
-        setScreen('room');
+        appContext.setScreen('Game');
       });
     },
     [socket]
   );
 
-  const joinRoom = useCallback(
-    (payload: JoinRoomPayload) => {
+  const joinGame = useCallback(
+    (payload: JoinGamePayload) => {
       if (!socket) {
         return;
       }
 
-      socket.emit('joinRoom', payload);
+      socket.emit('joinGame', payload);
 
-      socket.once('roomJoined', (payload: RoomJoinedPayload) => {
+      socket.once('gameJoined', (data: any) => {
+        const payload = gameJoinedPayloadSchema.parse(data);
         setGame({
-          id: payload.room.id,
-          hostId: payload.room.hostId,
-          code: payload.room.code,
-          state: payload.room.state,
-          players: payload.room.players.map((p) => ({ id: p.id, name: p.name })),
+          id: payload.game.id,
+          hostId: payload.game.hostId,
+          code: payload.game.code,
+          state: payload.game.state,
+          players: payload.game.players.map((p) => ({ id: p.id, name: p.name })),
         });
         setMyPlayerId(payload.player.id);
-        setScreen('room');
+        appContext.setScreen('Game');
       });
     },
     [socket]
@@ -164,12 +185,10 @@ export function GameContextProvider({ children }: PropsWithChildren) {
   );
 
   const contextValue: GameContextValue = {
-    screen: screen,
     game: game,
     myPlayerId: myPlayerId,
-    setScreen: setScreen,
-    createRoom: createRoom,
-    joinRoom: joinRoom,
+    createGame: createRoom,
+    joinRoom: joinGame,
     startGame: startGame,
     sendPrompt: sendPrompt,
   };

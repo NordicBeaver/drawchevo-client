@@ -1,49 +1,37 @@
-import DrawingScreen from './features/game/DrawingScreen';
-import { useGameContext } from './features/game/GameContext';
-import PromptScreen from './features/game/PromptScreen';
+import GameScreen from './features/game/GameScreen';
 import CreateGameScreen from './features/lobby/CreateGameScreen';
 import JoinGameScreen from './features/lobby/JoinGameScreen';
-import RoomScreen from './features/lobby/RoomScreen';
 import WelcomeScreen from './features/lobby/WelcomeScreen';
+import { useAppContext } from './features/state/AppContext';
 
 export default function Drawchevo() {
-  const gameContext = useGameContext();
+  const appContext = useAppContext();
 
   const handleWelcomeScreenCreateGame = () => {
-    gameContext.setScreen('create-game');
+    appContext.setScreen('CreateGame');
   };
 
   const handleWelcomeScreenJoinGame = () => {
-    gameContext.setScreen('join-game');
+    appContext.setScreen('JoinGame');
   };
 
   const handleGameScreenBack = () => {
-    gameContext.setScreen('welcome');
+    appContext.setScreen('Welcome');
   };
 
   return (
     <div className="text-text">
-      {gameContext.screen === 'welcome' ? (
+      {appContext.screen === 'Welcome' ? (
         <WelcomeScreen
           onCreateGame={handleWelcomeScreenCreateGame}
           onJoinGame={handleWelcomeScreenJoinGame}
         ></WelcomeScreen>
-      ) : gameContext.screen === 'create-game' ? (
+      ) : appContext.screen === 'CreateGame' ? (
         <CreateGameScreen onBack={handleGameScreenBack}></CreateGameScreen>
-      ) : gameContext.screen === 'join-game' ? (
+      ) : appContext.screen === 'JoinGame' ? (
         <JoinGameScreen onBack={handleGameScreenBack}></JoinGameScreen>
-      ) : gameContext.screen === 'room' ? (
-        gameContext.game?.state === 'notStarted' ? (
-          <RoomScreen></RoomScreen>
-        ) : gameContext.game?.state === 'enteringPrompts' ? (
-          <PromptScreen></PromptScreen>
-        ) : gameContext.game?.state === 'drawing' ? (
-          <DrawingScreen></DrawingScreen>
-        ) : gameContext.game?.state === 'finished' ? (
-          <div>Finished!</div>
-        ) : (
-          <div>Game state not defined...</div>
-        )
+      ) : appContext.screen === 'Game' ? (
+        <GameScreen></GameScreen>
       ) : (
         <div>Unknown screen...</div>
       )}

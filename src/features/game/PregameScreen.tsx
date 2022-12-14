@@ -1,6 +1,6 @@
 import Button from '../../ui/Button';
 import Container from '../../ui/Container';
-import { useGameContext } from '../game/GameContext';
+import { useGameContext } from './GameContext';
 
 export interface RoomScreenProps {
   onQuit?: () => void;

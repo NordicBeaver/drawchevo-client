@@ -3,7 +3,7 @@ export interface Player {
   name: string;
 }
 
-export type GameState = 'notStarted' | 'enteringPrompts' | 'drawing' | 'finished';
+export type GameState = 'NotStarted' | 'EnteringPrompts' | 'Drawing' | 'Finished';
 
 export interface Game {
   id: string;
