@@ -52,14 +52,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
 
     const listener = (data: any) => {
       const payload = gameUpdatePayloadSchema.parse(data);
-      const game = payload.game;
-      setGame({
-        id: game.id,
-        players: game.players.map((p) => ({ id: p.id, name: p.name })),
-        code: game.code,
-        state: game.state,
-        hostId: game.hostId,
-      });
+      setGame(payload.game);
     };
     socket.on('gameUpdate', listener);
     return () => {
@@ -77,13 +70,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
 
       socket.once('gameCreated', (data: any) => {
         const payload = gameCreatedPayloadSchema.parse(data);
-        setGame({
-          id: payload.game.id,
-          hostId: payload.game.hostId,
-          code: payload.game.code,
-          state: payload.game.state,
-          players: payload.game.players.map((p) => ({ id: p.id, name: p.name })),
-        });
+        setGame(payload.game);
         setMyPlayerId(payload.player.id);
         appContext.setScreen('Game');
       });
@@ -101,13 +88,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
 
       socket.once('gameJoined', (data: any) => {
         const payload = gameJoinedPayloadSchema.parse(data);
-        setGame({
-          id: payload.game.id,
-          hostId: payload.game.hostId,
-          code: payload.game.code,
-          state: payload.game.state,
-          players: payload.game.players.map((p) => ({ id: p.id, name: p.name })),
-        });
+        setGame(payload.game);
         setMyPlayerId(payload.player.id);
         appContext.setScreen('Game');
       });
