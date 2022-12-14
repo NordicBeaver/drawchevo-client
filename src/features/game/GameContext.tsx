@@ -51,7 +51,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
   const appContext = useAppContext();
 
   useEffect(() => {
-    const newSocket = io('ws://localhost:3001');
+    const newSocket = io(import.meta.env.VITE_SERVER_URL);
     setSocket(newSocket);
     return () => {
       socket?.disconnect();
