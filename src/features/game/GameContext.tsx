@@ -8,6 +8,8 @@ import {
   drawingDonePayloadSchema,
   gameCreatedPayloadSchema,
   gameJoinedPayloadSchema,
+  gameResultPayloadSchema,
+  gameResultSchema,
   gameUpdatePayloadSchema,
   joinGamePayloadSchema,
   promptDonePayloadSchema,
@@ -18,6 +20,7 @@ import { useAppContext } from '../state/AppContext';
 import { Game } from './Game';
 
 export type DrawingData = z.infer<typeof drawingDataSchema>;
+export type GameResult = z.infer<typeof gameResultSchema>;
 
 type CreateGamePayload = z.infer<typeof createGamePayloadSchema>;
 type JoinGamePayload = z.infer<typeof joinGamePayloadSchema>;
@@ -35,6 +38,7 @@ interface GameContextValue {
   sendPrompt: (payload: PromptDoneByPlayerPayload) => void;
   sendDrawing: (payload: DrawingDoneByPlayerPayload) => void;
   getDrawing: (paylaod: RequestDrawingDataPayload) => Promise<DrawingData | null>;
+  getGameResult: () => Promise<GameResult | null>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -158,6 +162,21 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     [socket]
   );
 
+  const getGameResult = useCallback(() => {
+    return new Promise<GameResult | null>((resolve, reject) => {
+      if (!socket) {
+        return resolve(null);
+      }
+
+      socket.emit('requestGameResult');
+
+      socket.once('gameResult', (data: any) => {
+        const payload = gameResultPayloadSchema.parse(data);
+        return resolve(payload.gameResult);
+      });
+    });
+  }, [socket]);
+
   const contextValue: GameContextValue = {
     game: game,
     myPlayerId: myPlayerId,
@@ -167,6 +186,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     sendPrompt: sendPrompt,
     sendDrawing: sendDrawing,
     getDrawing: getDrawing,
+    getGameResult: getGameResult,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;

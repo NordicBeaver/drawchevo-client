@@ -38,22 +38,20 @@ export default function DrawingScreen() {
   };
 
   return (
-    <Container>
-      <div className="h-full flex flex-col justify-between pb-12">
-        <div>
-          <span className="text-brand text-lg">DrawChevo</span>
-        </div>
-        <div>
-          <p>Please draw this:</p>
-          <p className="text-lg font-bold">{prompt.text}</p>
-        </div>
-        <div>
-          <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
-        </div>
-        <div>
-          <Button label="Done" variant="primary" onClick={handleDone}></Button>
-        </div>
+    <div className="min-h-full w-full flex flex-col justify-between pb-12">
+      <div>
+        <span className="text-brand text-lg">DrawChevo</span>
       </div>
-    </Container>
+      <div>
+        <p>Please draw this:</p>
+        <p className="text-lg font-bold">{prompt.text}</p>
+      </div>
+      <div>
+        <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
+      </div>
+      <div>
+        <Button label="Done" variant="primary" onClick={handleDone}></Button>
+      </div>
+    </div>
   );
 }

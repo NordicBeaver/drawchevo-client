@@ -19,7 +19,7 @@ export interface Chain {
   entries: string[];
 }
 
-export type GameState = 'NotStarted' | 'EnteringPrompts' | 'Drawing' | 'Finished';
+export type GameState = 'NotStarted' | 'EnteringPrompts' | 'Drawing' | 'Results';
 
 export interface Game {
   id: string;

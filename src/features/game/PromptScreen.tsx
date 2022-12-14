@@ -45,19 +45,17 @@ export default function PromptScreen() {
   };
 
   return (
-    <Container>
-      <div className="h-full flex flex-col justify-between pb-12 ">
-        <div>
-          <span className="text-brand text-lg">DrawChevo</span>
-        </div>
-        <div>{drawingData ? <img src={drawingData.data}></img> : null}</div>
-        <div>
-          <TextInput label="Enter something" value={prompt} onChange={setPrompt}></TextInput>
-        </div>
-        <div>
-          <Button label="Done" variant="primary" onClick={handleDone}></Button>
-        </div>
+    <div className="min-h-full w-full flex flex-col justify-between pb-12 ">
+      <div>
+        <span className="text-brand text-lg">DrawChevo</span>
       </div>
-    </Container>
+      <div>{drawingData ? <img src={drawingData.data}></img> : null}</div>
+      <div>
+        <TextInput label="Enter something" value={prompt} onChange={setPrompt}></TextInput>
+      </div>
+      <div>
+        <Button label="Done" variant="primary" onClick={handleDone}></Button>
+      </div>
+    </div>
   );
 }
