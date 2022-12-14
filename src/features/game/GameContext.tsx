@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { z } from 'zod';
 import {
   createGamePayloadSchema,
+  drawingDonePayloadSchema,
   gameCreatedPayloadSchema,
   gameJoinedPayloadSchema,
   gameUpdatePayloadSchema,
@@ -17,6 +18,7 @@ type CreateGamePayload = z.infer<typeof createGamePayloadSchema>;
 type JoinGamePayload = z.infer<typeof joinGamePayloadSchema>;
 type StartGamePayload = z.infer<typeof startGamePayloadSchema>;
 type PromptDoneByPlayerPayload = z.infer<typeof promptDonePayloadSchema>;
+type DrawingDoneByPlayerPayload = z.infer<typeof drawingDonePayloadSchema>;
 
 interface GameContextValue {
   game: Game | null;
@@ -25,6 +27,7 @@ interface GameContextValue {
   joinRoom: (payload: JoinGamePayload) => void;
   startGame: (payload: StartGamePayload) => void;
   sendPrompt: (payload: PromptDoneByPlayerPayload) => void;
+  sendDrawing: (payload: DrawingDoneByPlayerPayload) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -119,6 +122,18 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     [socket]
   );
 
+  const sendDrawing = useCallback(
+    (payload: DrawingDoneByPlayerPayload) => {
+      console.log({ payload });
+      if (!socket) {
+        return;
+      }
+
+      socket.emit('drawingDoneByPlayer', payload);
+    },
+    [socket]
+  );
+
   const contextValue: GameContextValue = {
     game: game,
     myPlayerId: myPlayerId,
@@ -126,6 +141,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     joinRoom: joinGame,
     startGame: startGame,
     sendPrompt: sendPrompt,
+    sendDrawing: sendDrawing,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;

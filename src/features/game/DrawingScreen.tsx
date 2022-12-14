@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SketchBoard } from 'react-sketchboard';
+import { SketchBoardControls } from 'react-sketchboard/dist/components/SketchBoard';
+import Button from '../../ui/Button';
 import Container from '../../ui/Container';
 import { useGameContext } from './GameContext';
 
 export default function DrawingScreen() {
+  const [sketchBoardControls, setSketchBoardControls] = useState<SketchBoardControls | null>(null);
+
   const gameContext = useGameContext();
 
   const game = gameContext.game;
@@ -24,6 +28,15 @@ export default function DrawingScreen() {
     return <div>Something went wrong lol</div>;
   }
 
+  const handleDone = () => {
+    if (sketchBoardControls == null) {
+      return;
+    }
+
+    const drawingData = sketchBoardControls.getImageDataUrl();
+    gameContext.sendDrawing({ promptId: prompt.id, drawingData: drawingData });
+  };
+
   return (
     <Container>
       <div className="h-full flex flex-col justify-between pb-12">
@@ -32,10 +45,13 @@ export default function DrawingScreen() {
         </div>
         <div>
           <p>Please draw this:</p>
-          <p>{prompt.text}</p>
+          <p className="text-lg font-bold">{prompt.text}</p>
         </div>
         <div>
-          <SketchBoard color="000000" weight={2}></SketchBoard>
+          <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
+        </div>
+        <div>
+          <Button label="Done" variant="primary" onClick={handleDone}></Button>
         </div>
       </div>
     </Container>
