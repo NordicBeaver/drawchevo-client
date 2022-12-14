@@ -1,68 +1,22 @@
-import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
-import { Game, GameState } from './Game';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { z } from 'zod';
+import {
+  createGamePayloadSchema,
+  gameCreatedPayloadSchema,
+  gameJoinedPayloadSchema,
+  gameUpdatePayloadSchema,
+  joinGamePayloadSchema,
+  promptDonePayloadSchema,
+  startGamePayloadSchema,
+} from '../../api/schemas';
 import { useAppContext } from '../state/AppContext';
-
-const playerDtoSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
-
-export type PlayerDto = z.infer<typeof playerDtoSchema>;
-
-const GameStateSchema = z.enum(['NotStarted', 'EnteringPrompts', 'Drawing', 'Finished']);
-
-const gameDtoSchema = z.object({
-  id: z.string(),
-  code: z.string(),
-  state: GameStateSchema,
-  players: z.array(playerDtoSchema),
-  hostId: z.string(),
-});
-
-export type GameDto = z.infer<typeof gameDtoSchema>;
-
-const gameUpdatePayloadSchema = z.object({
-  game: gameDtoSchema,
-});
-
-type GameUpdateDto = z.infer<typeof gameUpdatePayloadSchema>;
-
-const createGamePayloadSchema = z.object({
-  username: z.string(),
-});
+import { Game } from './Game';
 
 type CreateGamePayload = z.infer<typeof createGamePayloadSchema>;
-
-const gameCreatedPayloadSchema = z.object({
-  game: gameDtoSchema,
-  player: playerDtoSchema,
-});
-
-type GameCreatedPayload = z.infer<typeof gameCreatedPayloadSchema>;
-
-const joinGamePayloadSchema = z.object({
-  roomCode: z.string(),
-  username: z.string(),
-});
-
 type JoinGamePayload = z.infer<typeof joinGamePayloadSchema>;
-
-const gameJoinedPayloadSchema = z.object({
-  game: gameDtoSchema,
-  player: playerDtoSchema,
-});
-
-type GameJoinedPayload = z.infer<typeof gameCreatedPayloadSchema>;
-
-interface StartGamePayload {
-  playerId: string;
-}
-
-interface PromptDoneByPlayerPayload {
-  promptText: string;
-}
+type StartGamePayload = z.infer<typeof startGamePayloadSchema>;
+type PromptDoneByPlayerPayload = z.infer<typeof promptDonePayloadSchema>;
 
 interface GameContextValue {
   game: Game | null;
