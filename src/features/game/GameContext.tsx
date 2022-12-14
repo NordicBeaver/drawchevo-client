@@ -3,22 +3,28 @@ import { io, Socket } from 'socket.io-client';
 import { z } from 'zod';
 import {
   createGamePayloadSchema,
+  drawingDataPayloadSchema,
+  drawingDataSchema,
   drawingDonePayloadSchema,
   gameCreatedPayloadSchema,
   gameJoinedPayloadSchema,
   gameUpdatePayloadSchema,
   joinGamePayloadSchema,
   promptDonePayloadSchema,
+  requestDrawingDataPayloadSchema,
   startGamePayloadSchema,
 } from '../../api/schemas';
 import { useAppContext } from '../state/AppContext';
 import { Game } from './Game';
+
+export type DrawingData = z.infer<typeof drawingDataSchema>;
 
 type CreateGamePayload = z.infer<typeof createGamePayloadSchema>;
 type JoinGamePayload = z.infer<typeof joinGamePayloadSchema>;
 type StartGamePayload = z.infer<typeof startGamePayloadSchema>;
 type PromptDoneByPlayerPayload = z.infer<typeof promptDonePayloadSchema>;
 type DrawingDoneByPlayerPayload = z.infer<typeof drawingDonePayloadSchema>;
+type RequestDrawingDataPayload = z.infer<typeof requestDrawingDataPayloadSchema>;
 
 interface GameContextValue {
   game: Game | null;
@@ -28,6 +34,7 @@ interface GameContextValue {
   startGame: (payload: StartGamePayload) => void;
   sendPrompt: (payload: PromptDoneByPlayerPayload) => void;
   sendDrawing: (payload: DrawingDoneByPlayerPayload) => void;
+  getDrawing: (paylaod: RequestDrawingDataPayload) => Promise<DrawingData | null>;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -124,12 +131,29 @@ export function GameContextProvider({ children }: PropsWithChildren) {
 
   const sendDrawing = useCallback(
     (payload: DrawingDoneByPlayerPayload) => {
-      console.log({ payload });
       if (!socket) {
         return;
       }
 
       socket.emit('drawingDoneByPlayer', payload);
+    },
+    [socket]
+  );
+
+  const getDrawing = useCallback(
+    (payload: RequestDrawingDataPayload) => {
+      return new Promise<DrawingData | null>((resolve, reject) => {
+        if (!socket) {
+          return resolve(null);
+        }
+
+        socket.emit('requestDrawingData', payload);
+
+        socket.once('drawingData', (data: any) => {
+          const payload = drawingDataPayloadSchema.parse(data);
+          return resolve(payload.drawing);
+        });
+      });
     },
     [socket]
   );
@@ -142,6 +166,7 @@ export function GameContextProvider({ children }: PropsWithChildren) {
     startGame: startGame,
     sendPrompt: sendPrompt,
     sendDrawing: sendDrawing,
+    getDrawing: getDrawing,
   };
 
   return <GameContext.Provider value={contextValue}>{children}</GameContext.Provider>;
