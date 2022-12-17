@@ -41,7 +41,11 @@ export default function PromptScreen() {
       return;
     }
 
-    gameContext.sendPrompt({ promptText: prompt });
+    if (drawing != null) {
+      gameContext.sendPrompt({ promptText: prompt, drawingId: drawing.id });
+    } else {
+      gameContext.sendPrompt({ promptText: prompt });
+    }
   };
 
   return (
