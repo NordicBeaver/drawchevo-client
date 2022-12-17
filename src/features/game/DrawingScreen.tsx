@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { SketchBoard } from 'react-sketchboard';
 import { SketchBoardControls } from 'react-sketchboard/dist/components/SketchBoard';
 import Button from '../../ui/Button';
-import Container from '../../ui/Container';
 import { useGameContext } from './GameContext';
 
 export default function DrawingScreen() {
   const [sketchBoardControls, setSketchBoardControls] = useState<SketchBoardControls | null>(null);
+  const [drawingSent, setDrawingSent] = useState(false);
 
   const gameContext = useGameContext();
 
@@ -35,6 +35,8 @@ export default function DrawingScreen() {
 
     const drawingData = sketchBoardControls.getImageDataUrl();
     gameContext.sendDrawing({ promptId: prompt.id, drawingData: drawingData });
+
+    setDrawingSent(true);
   };
 
   return (
@@ -42,16 +44,24 @@ export default function DrawingScreen() {
       <div>
         <span className="text-brand text-lg">DrawChevo</span>
       </div>
-      <div>
-        <p>Please draw this:</p>
-        <p className="text-lg font-bold">{prompt.text}</p>
-      </div>
-      <div>
-        <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
-      </div>
-      <div>
-        <Button label="Done" variant="primary" onClick={handleDone}></Button>
-      </div>
+      {!drawingSent ? (
+        <>
+          <div>
+            <p>Please draw this:</p>
+            <p className="text-lg font-bold">{prompt.text}</p>
+          </div>
+          <div>
+            <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
+          </div>
+          <div>
+            <Button label="Done" variant="primary" onClick={handleDone}></Button>
+          </div>
+        </>
+      ) : (
+        <div>
+          <p>Waiting for other players...</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../../ui/Button';
-import Container from '../../ui/Container';
 import TextInput from '../../ui/TextInput';
 import { Game } from './Game';
 import { DrawingData, useGameContext } from './GameContext';
@@ -19,6 +18,7 @@ function getDrawingToName(game: Game, myId: string) {
 export default function PromptScreen() {
   const [prompt, setPrompt] = useState('');
   const [drawingData, setDrawingData] = useState<DrawingData | null>(null);
+  const [promptSent, setPromptSent] = useState(false);
 
   const gameContext = useGameContext();
   const game = gameContext.game;
@@ -46,6 +46,8 @@ export default function PromptScreen() {
     } else {
       gameContext.sendPrompt({ promptText: prompt });
     }
+
+    setPromptSent(true);
   };
 
   return (
@@ -53,13 +55,21 @@ export default function PromptScreen() {
       <div>
         <span className="text-brand text-lg">DrawChevo</span>
       </div>
-      <div>{drawingData ? <img src={drawingData.data}></img> : null}</div>
-      <div>
-        <TextInput label="Enter something" value={prompt} onChange={setPrompt}></TextInput>
-      </div>
-      <div>
-        <Button label="Done" variant="primary" onClick={handleDone}></Button>
-      </div>
+      {!promptSent ? (
+        <>
+          <div>{drawingData ? <img src={drawingData.data}></img> : null}</div>
+          <div>
+            <TextInput label="Enter something" value={prompt} onChange={setPrompt}></TextInput>
+          </div>
+          <div>
+            <Button label="Done" variant="primary" onClick={handleDone}></Button>
+          </div>
+        </>
+      ) : (
+        <div>
+          <p>Waiting for other players...</p>
+        </div>
+      )}
     </div>
   );
 }
