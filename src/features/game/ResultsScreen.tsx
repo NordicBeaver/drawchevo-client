@@ -38,7 +38,7 @@ export default function ResultsScreen() {
                       ) : (
                         <div>
                           {entry.playerName} drew:
-                          <img src={entry.drawingData}></img>
+                          <img src={entry.drawingData} className="bg-white"></img>
                         </div>
                       )}
                     </div>
