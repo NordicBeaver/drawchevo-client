@@ -57,7 +57,7 @@ export default function PromptScreen() {
       </div>
       {!promptSent ? (
         <>
-          <div>{drawingData ? <img src={drawingData.data}></img> : null}</div>
+          <div>{drawingData ? <img src={drawingData.data} className="bg-white"></img> : null}</div>
           <div>
             <TextInput label="Enter something" value={prompt} onChange={setPrompt}></TextInput>
           </div>
