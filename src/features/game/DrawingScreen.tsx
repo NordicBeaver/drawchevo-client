@@ -25,6 +25,7 @@ export default function DrawingScreen() {
   const prompt = lastStagePrompts.find((prompt) => prompt.playerId === prevPlayerId);
 
   if (!prompt) {
+    console.error('Drawing Screen: prompt not found');
     return <div>Something went wrong lol</div>;
   }
 

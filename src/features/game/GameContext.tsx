@@ -29,7 +29,7 @@ type PromptDoneByPlayerPayload = z.infer<typeof promptDonePayloadSchema>;
 type DrawingDoneByPlayerPayload = z.infer<typeof drawingDonePayloadSchema>;
 type RequestDrawingDataPayload = z.infer<typeof requestDrawingDataPayloadSchema>;
 
-interface GameContextValue {
+export interface GameContextValue {
   game: Game | null;
   myPlayerId: string | null;
   createGame: (payload: CreateGamePayload) => void;
@@ -41,7 +41,7 @@ interface GameContextValue {
   getGameResult: () => Promise<GameResult | null>;
 }
 
-const GameContext = createContext<GameContextValue | null>(null);
+export const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameContextProvider({ children }: PropsWithChildren) {
   const [socket, setSocket] = useState<Socket | null>(null);
