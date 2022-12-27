@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { SketchBoard } from 'react-sketchboard';
 import { SketchBoardControls } from 'react-sketchboard/dist/components/SketchBoard';
 import Button from '../../ui/Button';
+import ColorPicker from './ColorPicker';
 import { useGameContext } from './GameContext';
 
 export default function DrawingScreen() {
   const [sketchBoardControls, setSketchBoardControls] = useState<SketchBoardControls | null>(null);
   const [drawingSent, setDrawingSent] = useState(false);
+  const [color, setColor] = useState('#000000');
 
   const gameContext = useGameContext();
 
@@ -51,8 +53,14 @@ export default function DrawingScreen() {
             <p>Please draw this:</p>
             <p className="text-lg font-bold">{prompt.text}</p>
           </div>
-          <div>
-            <SketchBoard color="000000" weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
+          <div className="flex flex-col gap-2">
+            <ColorPicker
+              options={['#000000', '#ff0000', '#00ff00', '#0000ff']}
+              value={color}
+              onChange={setColor}
+            ></ColorPicker>
+            {/* Fix the need to strip '#' from color */}
+            <SketchBoard color={color.slice(1)} weight={2} onControlsChange={setSketchBoardControls}></SketchBoard>
           </div>
           <div>
             <Button label="Done" variant="primary" onClick={handleDone}></Button>
